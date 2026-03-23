@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JWT Demo</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="container">
+    <section class="hero">
+      <p class="eyebrow">Demo JWT</p>
+      <h1>Teste cadastro, login e rota protegida.</h1>
+      <p class="subtitle">Criei essa página para você visualizar a API funcionando no navegador.</p>
+    </section>
+
+    <section class="grid">
+      <form id="register-form" class="card">
+        <h2>Cadastrar</h2>
+        <label>
+          Nome
+          <input name="name" placeholder="Seu nome" required />
+        </label>
+        <label>
+          Email
+          <input name="email" type="email" placeholder="voce@email.com" required />
+        </label>
+        <label>
+          Senha
+          <input name="password" type="password" placeholder="123456" required />
+        </label>
+        <button type="submit">Criar usuário</button>
+      </form>
+
+      <form id="login-form" class="card">
+        <h2>Login</h2>
+        <label>
+          Email
+          <input name="email" type="email" placeholder="voce@email.com" required />
+        </label>
+        <label>
+          Senha
+          <input name="password" type="password" placeholder="123456" required />
+        </label>
+        <button type="submit">Entrar</button>
+      </form>
+
+      <section class="card">
+        <h2>Rota protegida</h2>
+        <p>Depois do login, clique para buscar o perfil com o token JWT.</p>
+        <button id="profile-button" type="button">Buscar perfil</button>
+        <label>
+          Token JWT
+          <textarea id="token-output" rows="8" placeholder="O token aparecerá aqui..."></textarea>
+        </label>
+      </section>
+    </section>
+
+    <section class="card output-card">
+      <div class="output-header">
+        <h2>Resposta da API</h2>
+        <button id="clear-output" type="button" class="ghost">Limpar</button>
+      </div>
+      <pre id="output">Aguardando ações...</pre>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
