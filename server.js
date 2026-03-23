@@ -7,9 +7,8 @@ const { URL } = require('url');
 const PORT = Number(process.env.PORT || 3000);
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 const publicDir = path.join(__dirname, 'public');
-
-const users = [];
-let nextUserId = 1;
+const dataDir = path.join(__dirname, 'data');
+const usersFile = path.join(dataDir, 'users.json');
 
 const mimeTypes = {
   '.html': 'text/html; charset=utf-8',
@@ -18,9 +17,37 @@ const mimeTypes = {
   '.json': 'application/json; charset=utf-8'
 };
 
+fs.mkdirSync(dataDir, { recursive: true });
+
+function loadUsers() {
+  if (!fs.existsSync(usersFile)) {
+    fs.writeFileSync(usersFile, '[]\n', 'utf8');
+    return [];
+  }
+
+  try {
+    const content = fs.readFileSync(usersFile, 'utf8');
+    const parsed = JSON.parse(content);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+let users = loadUsers();
+let nextUserId = users.reduce((maxId, user) => Math.max(maxId, Number(user.id) || 0), 0) + 1;
+
+function saveUsers() {
+  fs.writeFileSync(usersFile, `${JSON.stringify(users, null, 2)}\n`, 'utf8');
+}
+
 function sendJson(res, statusCode, payload) {
   res.writeHead(statusCode, { 'Content-Type': 'application/json; charset=utf-8' });
   res.end(JSON.stringify(payload));
+}
+
+function hashPassword(password) {
+  return crypto.createHash('sha256').update(String(password)).digest('hex');
 }
 
 function base64UrlEncode(value) {
@@ -114,7 +141,7 @@ function readBody(req) {
 
 function serveStaticFile(res, pathname) {
   const requestedPath = pathname === '/' ? '/index.html' : pathname;
-  const safePath = path.normalize(requestedPath).replace(/^\.\.(\/|\\|$)/, '');
+  const safePath = path.normalize(requestedPath).replace(/^(\.\.(\/|\\|$))+/, '');
   const filePath = path.join(publicDir, safePath);
 
   if (!filePath.startsWith(publicDir)) {
@@ -134,6 +161,15 @@ function serveStaticFile(res, pathname) {
   });
 }
 
+function publicUser(user) {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    createdAt: user.createdAt
+  };
+}
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
 
@@ -143,6 +179,11 @@ const server = http.createServer(async (req, res) => {
 
       if (!name || !email || !password) {
         sendJson(res, 400, { error: 'Preencha name, email e password.' });
+        return;
+      }
+
+      if (String(password).length < 4) {
+        sendJson(res, 400, { error: 'A senha precisa ter pelo menos 4 caracteres.' });
         return;
       }
 
@@ -158,14 +199,18 @@ const server = http.createServer(async (req, res) => {
         id: nextUserId++,
         name: String(name).trim(),
         email: normalizedEmail,
-        password: String(password)
+        passwordHash: hashPassword(password),
+        createdAt: new Date().toISOString()
       };
 
       users.push(user);
+      saveUsers();
 
+      const token = createToken({ id: user.id, email: user.email, name: user.name });
       sendJson(res, 201, {
-        message: 'Usuário criado com sucesso.',
-        user: { id: user.id, name: user.name, email: user.email }
+        message: 'Conta criada e login efetuado com sucesso.',
+        token,
+        user: publicUser(user)
       });
     } catch (error) {
       sendJson(res, 400, { error: error.message });
@@ -179,16 +224,16 @@ const server = http.createServer(async (req, res) => {
       const normalizedEmail = String(email || '').trim().toLowerCase();
       const user = users.find((candidate) => candidate.email === normalizedEmail);
 
-      if (!user || user.password !== String(password || '')) {
+      if (!user || user.passwordHash !== hashPassword(password || '')) {
         sendJson(res, 401, { error: 'Email ou senha inválidos.' });
         return;
       }
 
-      const token = createToken({ id: user.id, email: user.email });
+      const token = createToken({ id: user.id, email: user.email, name: user.name });
       sendJson(res, 200, {
         message: 'Login realizado com sucesso.',
         token,
-        user: { id: user.id, name: user.name, email: user.email }
+        user: publicUser(user)
       });
     } catch (error) {
       sendJson(res, 400, { error: error.message });
@@ -216,12 +261,19 @@ const server = http.createServer(async (req, res) => {
 
       sendJson(res, 200, {
         message: 'Perfil carregado com sucesso.',
-        profile: { id: user.id, name: user.name, email: user.email },
+        profile: publicUser(user),
         tokenPayload: payload
       });
     } catch (error) {
       sendJson(res, 401, { error: error.message });
     }
+    return;
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/users') {
+    sendJson(res, 200, {
+      users: users.map(publicUser)
+    });
     return;
   }
 
