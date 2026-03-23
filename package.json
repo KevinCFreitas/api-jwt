@@ -1,0 +1,9 @@
+{
+  "name": "api-jwt",
+  "version": "1.0.0",
+  "description": "JWT demo API with a simple browser test page",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

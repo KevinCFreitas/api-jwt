@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Página de Login JWT</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="container">
+    <section class="hero card">
+      <p class="eyebrow">JWT + página web</p>
+      <h1>Cadastre, faça login e continue logado pelo navegador.</h1>
+      <p class="subtitle">
+        Agora a conta fica salva no servidor em arquivo local e o token fica guardado no navegador para você testar tudo sem usar terminal.
+      </p>
+      <div class="status-row">
+        <span id="session-status" class="status-chip">Deslogado</span>
+        <button id="logout-button" type="button" class="ghost">Sair</button>
+      </div>
+    </section>
+
+    <section class="layout">
+      <section class="forms-column">
+        <form id="register-form" class="card">
+          <h2>Criar conta</h2>
+          <label>
+            Nome
+            <input name="name" placeholder="Seu nome" required />
+          </label>
+          <label>
+            Email
+            <input name="email" type="email" placeholder="voce@email.com" required />
+          </label>
+          <label>
+            Senha
+            <input name="password" type="password" placeholder="mínimo 4 caracteres" required />
+          </label>
+          <button type="submit">Cadastrar e entrar</button>
+        </form>
+
+        <form id="login-form" class="card">
+          <h2>Entrar com conta existente</h2>
+          <label>
+            Email
+            <input name="email" type="email" placeholder="voce@email.com" required />
+          </label>
+          <label>
+            Senha
+            <input name="password" type="password" placeholder="Sua senha" required />
+          </label>
+          <button type="submit">Fazer login</button>
+        </form>
+      </section>
+
+      <section class="card profile-card">
+        <div class="profile-header">
+          <div>
+            <p class="section-label">Conta logada</p>
+            <h2 id="profile-name">Nenhum usuário autenticado</h2>
+            <p id="profile-email" class="muted">Faça cadastro ou login para carregar os dados.</p>
+          </div>
+          <button id="profile-button" type="button">Atualizar perfil</button>
+        </div>
+
+        <label>
+          Token JWT atual
+          <textarea id="token-output" rows="7" readonly placeholder="O token salvo no navegador aparecerá aqui."></textarea>
+        </label>
+
+        <div class="helper-grid">
+          <section>
+            <p class="section-label">Como testar</p>
+            <ol>
+              <li>Cadastre uma conta.</li>
+              <li>Recarregue a página se quiser.</li>
+              <li>Faça login novamente com a mesma conta.</li>
+              <li>Clique em “Atualizar perfil”.</li>
+            </ol>
+          </section>
+          <section>
+            <p class="section-label">Contas cadastradas</p>
+            <ul id="users-list" class="users-list">
+              <li>Nenhuma conta cadastrada ainda.</li>
+            </ul>
+          </section>
+        </div>
+      </section>
+    </section>
+
+    <section class="card output-card">
+      <div class="output-header">
+        <h2>Resposta da API</h2>
+        <button id="clear-output" type="button" class="ghost">Limpar</button>
+      </div>
+      <pre id="output">Aguardando ações...</pre>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
