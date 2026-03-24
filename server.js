@@ -277,6 +277,17 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === 'GET' && url.pathname === '/api/project-info') {
+    sendJson(res, 200, {
+      name: 'JWT Auth Demo',
+      description: 'Demo de autenticação JWT com cadastro, login, sessão persistida e rota protegida.',
+      stack: ['Node.js', 'JavaScript', 'JWT', 'HTML', 'CSS'],
+      endpoints: ['/api/register', '/api/login', '/api/profile', '/api/users'],
+      runCommand: 'npm start'
+    });
+    return;
+  }
+
   if (req.method === 'GET') {
     serveStaticFile(res, url.pathname);
     return;
